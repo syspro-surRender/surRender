@@ -25,7 +25,7 @@ struct Mesh {
   Mesh& operator=(const Mesh&) = delete;
   ~Mesh();
 
-  void draw(Shader& shader);
+  void draw(Shader& shader) const;
 };
 
 #endif

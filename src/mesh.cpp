@@ -37,8 +37,8 @@ Mesh::~Mesh() {
   glDeleteVertexArrays(1, &VAO);
 }
 
-void Mesh::draw(Shader& shader) {
-  glUseProgram(shader.id);
+void Mesh::draw(Shader& shader) const {
+  shader.use(); //todo rethink rebinding shader each draw (reuse shader across meshes?)
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }

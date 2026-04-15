@@ -1,29 +1,11 @@
 #include "mesh.h"
+#include "shader.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <cstdio>
-#include <cstring>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
-
-const char* vertexShaderSource =
-    "#version 460 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-const char* fragmentShaderSource =
-    "#version 460 core\n"
-    "out vec4 FragColor;\n\n"
-
-    "void main()\n"
-    "{\n"
-    "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}";
 
 int main() {
   if (!glfwInit()) {
@@ -38,7 +20,7 @@ int main() {
   glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
   GLFWwindow* window;
-  window = glfwCreateWindow(800, 600, "Test", nullptr, nullptr);
+  window = glfwCreateWindow(800, 800, "Test", nullptr, nullptr);
   if (window == nullptr) {
     glfwTerminate();
     std::cerr << "window creation failed\n";
@@ -46,7 +28,7 @@ int main() {
   }
   glfwMakeContextCurrent(window);
 
-  glViewport(0, 0, 800, 600);
+  glViewport(0, 0, 800, 800);
 
   glewExperimental = GL_TRUE;
   if (glewInit() != GLEW_OK) {
@@ -54,38 +36,23 @@ int main() {
     return -1;
   }
 
-  // glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+  std::string shader_folder_path = "assets/shaders/";
+  Shader shader                  = Shader(shader_folder_path + "default.vert", shader_folder_path + "default.frag");
 
-  unsigned int vertexShader;
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
-
-  unsigned int fragmentShader;
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
-
-  unsigned int shaderProgram;
-  shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
-
-  std::vector<Vertex> vertices = {
-      {{-0.5f, -0.5f, 0.0f}},
-      {{0.4f, -0.5f, 0.0f}},
-      {{0.5f, 0.5f, 0.0f}},
-      {{-0.4f, 0.5f, 0.0f}}};
+  std::vector<Vertex>
+      vertices = {
+          {{0.0f, 0.5f, 0.0f}},
+          {{0.433f, -0.25f, 0.0f}},
+          {{-0.433f, -0.25f, 0.0f}},
+          {{0.0f, -0.5f, 0.0f}},
+          {{0.433f, 0.25f, 0.0f}},
+          {{-0.433f, 0.25f, 0.0f}},
+      };
 
   std::vector<Mesh::uint> indices = {0, 1, 2,
-                                     0, 2, 3};
+                                     3, 4, 5};
 
   Mesh triangle = Mesh(vertices, indices);
-  Shader shader = Shader(shaderProgram);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

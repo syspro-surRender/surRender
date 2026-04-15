@@ -16,7 +16,9 @@ struct Shader {
 
   ~Shader();
 
-  uint id;
+  void use() const;
+
+  uint program;
 };
 
 #endif
