@@ -1,9 +1,12 @@
+#include "mesh.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <cstdio>
 #include <cstring>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <vector>
 
 const char* vertexShaderSource =
     "#version 460 core\n"
@@ -72,31 +75,24 @@ int main() {
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
-  float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+  std::vector<Vertex> vertices = {
+      {{-0.5f, -0.5f, 0.0f}},
+      {{0.4f, -0.5f, 0.0f}},
+      {{0.5f, 0.5f, 0.0f}},
+      {{-0.4f, 0.5f, 0.0f}}};
 
-  unsigned int VBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
+  std::vector<Mesh::uint> indices = {0, 1, 2,
+                                     0, 2, 3};
 
-  glBindVertexArray(VAO);
+  Mesh triangle = Mesh(vertices, indices);
+  Shader shader = Shader(shaderProgram);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
-  glEnableVertexAttribArray(0);
-
-  // non necessary
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   do {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shaderProgram);
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    // glDrawElements(GL_TRIANGLES, ));
+    triangle.draw(shader);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

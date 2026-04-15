@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-struct Vertex {
+extern "C" struct Vertex {
   glm::vec3 position;
 };
 
@@ -16,7 +16,7 @@ struct Mesh {
   std::vector<Vertex> vertices;
   std::vector<uint> indices;
 
-  uint VBO;
+  uint VBO, VAO, EBO;
 
   // We REALLY don't want Mesh to be deleted from GPU if we accidentaly copied and deleted it, so we forbid copies altogether
   // With this we're effectively assuring that Meshes passed by reference. No problems with moving, btw

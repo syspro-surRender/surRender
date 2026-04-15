@@ -9,7 +9,7 @@ InlayHints:
   Enabled: true
   ParameterNames: true
   DeducedTypes: true
-  Designators: true
+  Designators: false
   BlockEnd: false
   DefaultArguments: false
   TypeNameLimit: 24
