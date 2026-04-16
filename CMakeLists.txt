@@ -10,7 +10,7 @@ find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 
 include_directories(${GLUT_INCLUDE_DIRS})
-include_directories(include/)
+include_directories(include/ libs/)
 
 # file(GLOB source_files "*.h" "*.cpp" "src/*.cpp" "include/*.h" "libs/*.h" "libs/*.c")
 # file(GLOB_RECURSE lib_files "libs/*.h" "libs/*.c" "libs/*.cpp")
@@ -19,7 +19,7 @@ include_directories(include/)
 
 
 add_executable(surRender
-  src/main.cpp src/mesh.cpp src/shader.cpp
+  src/main.cpp src/mesh.cpp src/shader.cpp src/texture.cpp
 )
 
 target_link_libraries(surRender OpenGL::OpenGL glfw GLEW)

@@ -1,6 +1,6 @@
 CompileFlags:
   Compiler: clang++
-  Add: [-Iinclude/, -std=c++20, -Wall, -Wextra, -Wpedantic]
+  Add: [-Iinclude/ -Ilibs/, -std=c++20, -Wall, -Wextra, -Wpedantic]
 
 Completion:
   ArgumentLists: Delimiters
@@ -13,3 +13,16 @@ InlayHints:
   BlockEnd: false
   DefaultArguments: false
   TypeNameLimit: 24
+
+---
+
+If:
+	PathMatch: .*\.cpp
+CompileFlags:
+  Add: [-xc++]
+---
+
+If:
+	PathMatch: .*\.h
+CompileFlags:
+  Add: [-xc++-header]

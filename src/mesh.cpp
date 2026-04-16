@@ -3,8 +3,10 @@
 #include "GL/glew.h"
 #include "shader.h"
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint>& indices):
-    vertices(vertices), indices(indices) {
+#include <cstddef>
+
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint>& indices, const std::vector<uint>& textures):
+    vertices(vertices), indices(indices), textures(textures) {
   {
     Mesh::uint buffers[2];
     glGenBuffers(2, buffers);
@@ -23,8 +25,12 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint>& indices
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(Mesh::uint), &indices[0], GL_STATIC_DRAW);
 
   // setting vertex position pointer
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
+  glVertexAttribPointer(0, decltype(Vertex::position)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, position));
   glEnableVertexAttribArray(0);
+
+  // setting vertex texture coordinates pointer
+  glVertexAttribPointer(1, decltype(Vertex::texCoord)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, texCoord));
+  glEnableVertexAttribArray(1);
 
   // unbinding
   glBindVertexArray(0);
@@ -39,6 +45,7 @@ Mesh::~Mesh() {
 
 void Mesh::draw(Shader& shader) const {
   shader.use(); //todo rethink rebinding shader each draw (reuse shader across meshes?)
+  glBindTexture(GL_TEXTURE_2D, textures[0]);
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }

@@ -1,5 +1,6 @@
 #include "mesh.h"
 #include "shader.h"
+#include "texture.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -39,22 +40,25 @@ int main() {
   std::string shader_folder_path = "assets/shaders/";
   Shader shader                  = Shader(shader_folder_path + "default.vert", shader_folder_path + "default.frag");
 
-  std::vector<Vertex>
-      vertices = {
-          {{0.0f, 0.5f, 0.0f}},
-          {{0.433f, -0.25f, 0.0f}},
-          {{-0.433f, -0.25f, 0.0f}},
-          {{0.0f, -0.5f, 0.0f}},
-          {{0.433f, 0.25f, 0.0f}},
-          {{-0.433f, 0.25f, 0.0f}},
-      };
+  std::vector<Vertex> vertices = {
+      {{0.0f, 0.5f, 0.0f}, {0.0f, 0.5f}},
+      {{0.433f, -0.25f, 0.0f}, {0.433f, -0.25f}},
+      {{-0.433f, -0.25f, 0.0f}, {-0.433f, -0.25f}},
+      {{0.0f, -0.5f, 0.0f}, {0.0f, -0.5f}},
+      {{0.433f, 0.25f, 0.0f}, {0.433f, 0.25f}},
+      {{-0.433f, 0.25f, 0.0f}, {-0.433f, 0.25f}},
+  };
 
   std::vector<Mesh::uint> indices = {0, 1, 2,
                                      3, 4, 5};
 
-  Mesh triangle = Mesh(vertices, indices);
+  Texture tex = {"assets/textures/wall.jpg"};
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  std::vector<Mesh::uint> textures = {tex.id};
+
+  Mesh triangle = Mesh(vertices, indices, textures);
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   do {
     glClear(GL_COLOR_BUFFER_BIT);
