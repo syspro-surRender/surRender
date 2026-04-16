@@ -20,6 +20,7 @@ include_directories(include/)
 
 add_executable(surRender
   src/main.cpp
+  src/camera.cpp
 )
 
 target_link_libraries(surRender OpenGL::OpenGL glfw GLEW)

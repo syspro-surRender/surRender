@@ -4,13 +4,21 @@
 #include <cstring>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
+#include "camera.h"
+
+#define WINDOW_WIDTH  800
+#define WINDOW_HEIGHT 600
+#define ASPECT WINDOW_WIDTH / WINDOW_HEIGHT
 
 const char* vertexShaderSource =
     "#version 460 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "uniform mat4 view;"
+    "uniform mat4 projection;"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = projection * view * vec4(aPos, 1.0);\n"
     "}\0";
 
 const char* fragmentShaderSource =
@@ -19,7 +27,7 @@ const char* fragmentShaderSource =
 
     "void main()\n"
     "{\n"
-    "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "    FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
     "}";
 
 int main() {
@@ -35,7 +43,7 @@ int main() {
   glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
   GLFWwindow* window;
-  window = glfwCreateWindow(800, 600, "Test", nullptr, nullptr);
+  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Test", nullptr, nullptr);
   if (window == nullptr) {
     glfwTerminate();
     std::cerr << "window creation failed\n";
@@ -43,7 +51,7 @@ int main() {
   }
   glfwMakeContextCurrent(window);
 
-  glViewport(0, 0, 800, 600);
+  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   glewExperimental = GL_TRUE;
   if (glewInit() != GLEW_OK) {
@@ -72,7 +80,16 @@ int main() {
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
-  float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+  unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+  unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
+
+  float vertices[] = {-0.8f, -0.8f, 0.0f,
+                     0.8f, -0.8f, 0.0f,
+                     0.0f,  0.8f, 0.0f,
+					-1.8f, -0.8f, -10.0f,
+                     1.8f, -0.8f, -10.0f,
+                     1.0f,  0.8f, -10.0f};
+
 
   unsigned int VBO, VAO;
   glGenVertexArrays(1, &VAO);
@@ -90,12 +107,39 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
+  Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
   do {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.moveForward(0.016f);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.moveBackward(0.016f);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    	camera.moveLeft(0.016f);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.moveRight(0.016f);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        camera.moveUp(0.016f);
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        camera.moveDown(0.016f);
+
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        camera.rotateYaw(-1.0f);
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        camera.rotateYaw(1.0f);
+
+    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    
+    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 projection = camera.getProjectionMatrix(ASPECT);
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     // glDrawElements(GL_TRIANGLES, ));
 
     glfwSwapBuffers(window);
