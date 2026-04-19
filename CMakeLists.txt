@@ -20,6 +20,7 @@ include_directories(include/ libs/)
 
 add_executable(surRender
   src/main.cpp src/mesh.cpp src/shader.cpp src/texture.cpp
+  src/model.cpp
 )
 
 target_link_libraries(surRender OpenGL::OpenGL glfw GLEW)

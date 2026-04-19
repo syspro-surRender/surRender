@@ -43,7 +43,7 @@ Mesh::~Mesh() {
   glDeleteVertexArrays(1, &VAO);
 }
 
-void Mesh::draw(Shader& shader) const {
+void Mesh::draw(const Shader& shader) const { //todo: draw() & draw(const Shader&)
   shader.use(); //todo rethink rebinding shader each draw (reuse shader across meshes?)
   glBindTexture(GL_TEXTURE_2D, textures[0]);
   glBindVertexArray(VAO);

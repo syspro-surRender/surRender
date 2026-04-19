@@ -1,9 +1,11 @@
 #include "mesh.h"
+#include "model.h"
 #include "shader.h"
 #include "texture.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
@@ -58,12 +60,20 @@ int main() {
 
   Mesh triangle = Mesh(vertices, indices, textures);
 
+  std::vector<Mesh> meshes;
+  meshes.push_back(std::move(triangle));
+
+  Model model = Model(std::move(meshes), {.position={0.f, 0.f, 0.f}, .orientation={0.f, 0.f, 0.f, 1.0f}, .scaling={1.f, 1.f, 1.f}});
+  model.aVelocity = {0, 0, 0.05f};
+
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   do {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    triangle.draw(shader);
+    model.update(1);
+    // triangle.draw(shader);
+    model.draw(shader);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
