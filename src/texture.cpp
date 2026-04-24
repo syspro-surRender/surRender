@@ -1,10 +1,10 @@
 #include "texture.h"
 
 #include "GL/glew.h"
+
+#include <spdlog/spdlog.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
-#include <stdexcept>
 
 Texture::Texture(std::string path) {
   using byte = unsigned char;
@@ -12,8 +12,10 @@ Texture::Texture(std::string path) {
   int width, height, nrChannels;
 
   byte* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
-  if (!data)
-    throw std::runtime_error("Couldn't load texture at " + path);
+  if (!data) {
+    spdlog::error("Couldn't load texture at " + path);
+    return;
+  }
 
   glGenTextures(1, &id);
   glBindTexture(GL_TEXTURE_2D, id);
@@ -30,5 +32,6 @@ Texture::Texture(std::string path) {
 }
 
 Texture::~Texture() {
+  spdlog::info("Destructor of texture with id {} was called", id);
   glDeleteTextures(1, &id);
 }

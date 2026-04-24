@@ -3,6 +3,7 @@
 #include "GL/glew.h"
 
 #include <fstream>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -36,17 +37,34 @@ Shader::Shader(const std::string vPath, const std::string fPath) {
   const char* vCode = vCodeString.c_str();
   const char* fCode = fCodeString.c_str();
 
+  int status;
 
   Shader::uint vertexShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertexShader, 1, &vCode, NULL);
   glCompileShader(vertexShader);
-  //todo error handling
+
+  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+  if (!status) {
+    int length;
+    glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &length);
+    char* buf = new char[length]();
+    glGetShaderInfoLog(vertexShader, length, &status, buf);
+    spdlog::error("Failed to compile vertex shader {}\n Shader log: {}", vPath, buf);
+  }
 
 
   Shader::uint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragmentShader, 1, &fCode, NULL);
   glCompileShader(fragmentShader);
-  //todo error handling
+
+  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+  if (!status) {
+    int length;
+    glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &length);
+    char* buf = new char[length]();
+    glGetShaderInfoLog(vertexShader, length, &status, buf);
+    spdlog::error("Failed to compile fragment shader {}\n Shader log: {}", vPath, buf);
+  }
 
   program = glCreateProgram();
 

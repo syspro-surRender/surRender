@@ -3,7 +3,10 @@
 #include "GL/glew.h"
 #include "shader.h"
 
+#include <GL/gl.h>
 #include <cstddef>
+#include <spdlog/spdlog.h>
+#include <utility>
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint>& indices, const std::vector<uint>& textures):
     vertices(vertices), indices(indices), textures(textures) {
@@ -34,17 +37,33 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint>& indices
 
   // unbinding
   glBindVertexArray(0);
-  // glBindBuffer(GL_ARRAY_BUFFER, 0);
-  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+Mesh::Mesh(Mesh&& other) {
+  std::swap(vertices, other.vertices);
+  std::swap(indices, other.indices);
+  std::swap(textures, other.textures);
+
+  VAO       = other.VAO;
+  VBO       = other.VBO;
+  EBO       = other.EBO;
+  other.VAO = other.VBO = other.EBO = 0;
 }
 
 Mesh::~Mesh() {
-  glDeleteBuffers(1, &VBO);
-  glDeleteVertexArrays(1, &VAO);
+  spdlog::info("Destructor of mesh with VAO {}, VBO {}, EBO {} was called", VAO, VBO, EBO);
+  if (VBO) {
+    Mesh::uint buf[2] = {VBO, EBO};
+    glDeleteBuffers(2, buf);
+    glDeleteVertexArrays(1, &VAO);
+  }
 }
 
 void Mesh::draw(const Shader& shader) const { //todo: draw() & draw(const Shader&)
-  shader.use(); //todo rethink rebinding shader each draw (reuse shader across meshes?)
+  // shader.use();                               //todo rethink rebinding shader each draw (reuse shader across meshes?)
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textures[0]);
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

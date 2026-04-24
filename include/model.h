@@ -4,6 +4,7 @@
 #include "mesh.h"
 #include "shader.h"
 #include "texture.h"
+
 #include <glm/fwd.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <unordered_map>
@@ -25,11 +26,12 @@ struct Model {
 
   Model(std::string, const TransformParameters&);
   Model(std::vector<Mesh>&&, const TransformParameters&);
+  ~Model();
 
   void update(const unsigned int); //todo: change to time type
   void draw(const Shader&) const;
 
-// private:
+  // private:
   void calculateMatrix();
   TransformParameters transform;
 

@@ -1,30 +1,40 @@
 #include "model.h"
-#include "shader.h"
+
 #include "GL/glew.h"
+#include "shader.h"
+
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/quaternion_transform.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/fwd.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <spdlog/spdlog.h>
 
-Model::Model(std::string, const TransformParameters& params): speed(1.0f), aSpeed(1.0f) {
+Model::Model(std::string, const TransformParameters& params):
+    speed(1.0f), aSpeed(1.0f), aVelocity(0.0f), velocity(0.0f) {
   transform = params;
   calculateMatrix();
 }
 
-Model::Model(std::vector<Mesh>&& meshes, const TransformParameters& params): speed(1.0f), aSpeed(1.0f) {
-  this->meshes = std::move(meshes);
+Model::Model(std::vector<Mesh>&& meshes, const TransformParameters& params):
+    meshes(std::move(meshes)), speed(1.0f), aSpeed(1.0f), aVelocity(0.0f), velocity(0.0f) {
   transform = params;
   calculateMatrix();
+}
+
+Model::~Model() {
+  spdlog::info("Destructor of model was called");
 }
 
 void Model::draw(const Shader& shader) const {
   unsigned int loc = glGetUniformLocation(shader.program, "transform");
   glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-  for(auto& mesh: meshes)
+  // shader.use();
+  for (auto& mesh : meshes)
     mesh.draw(shader);
 }
+
 void Model::update(const unsigned int deltaT) {
   transform.position += velocity * (speed * deltaT);
   transform.orientation = glm::quat((aSpeed * deltaT) * aVelocity) * transform.orientation;
