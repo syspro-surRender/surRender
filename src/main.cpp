@@ -15,7 +15,7 @@
 int main() {
   std::vector<spdlog::sink_ptr> sinks;
   sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_st>());
-  sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_st>("log.txt"));
+  sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_st>("log.txt", true));
   spdlog::set_default_logger(std::make_shared<spdlog::logger>("Base", begin(sinks), end(sinks)));
 
   if (!glfwInit()) {
