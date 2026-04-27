@@ -23,3 +23,6 @@ add_executable(surRender
 )
 
 target_link_libraries(surRender OpenGL::OpenGL glfw GLEW)
+
+find_package(ASSIMP REQUIRED)
+target_link_libraries(surRender PRIVATE Assimp::Assimp)
