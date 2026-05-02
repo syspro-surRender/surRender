@@ -1,38 +1,25 @@
+#include "mesh.h"
+#include "model.h"
+#include "shader.h"
+#include "texture.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <cstdio>
-#include <cstring>
 #include <glm/glm.hpp>
 #include <iostream>
-#include <glm/gtc/type_ptr.hpp>
-#include "camera.h"
-
-#define WINDOW_WIDTH  800
-#define WINDOW_HEIGHT 600
-#define ASPECT WINDOW_WIDTH / WINDOW_HEIGHT
-
-const char* vertexShaderSource =
-    "#version 460 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "uniform mat4 view;"
-    "uniform mat4 projection;"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = projection * view * vec4(aPos, 1.0);\n"
-    "}\0";
-
-const char* fragmentShaderSource =
-    "#version 460 core\n"
-    "out vec4 FragColor;\n\n"
-
-    "void main()\n"
-    "{\n"
-    "    FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
-    "}";
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+#include <vector>
 
 int main() {
+  std::vector<spdlog::sink_ptr> sinks;
+  sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_st>());
+  sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_st>("log.txt", true));
+  spdlog::set_default_logger(std::make_shared<spdlog::logger>("Base", begin(sinks), end(sinks)));
+
   if (!glfwInit()) {
-    std::cerr << "GLFW init failed\n";
+    spdlog::error("GLFW init failed\n");
     return -1;
   }
 
@@ -43,15 +30,15 @@ int main() {
   glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
   GLFWwindow* window;
-  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Test", nullptr, nullptr);
+  window = glfwCreateWindow(800, 800, "Test", nullptr, nullptr);
   if (window == nullptr) {
     glfwTerminate();
-    std::cerr << "window creation failed\n";
+    spdlog::error("Window creation failed\n");
     return -1;
   }
   glfwMakeContextCurrent(window);
 
-  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+  glViewport(0, 0, 800, 800);
 
   glewExperimental = GL_TRUE;
   if (glewInit() != GLEW_OK) {
@@ -59,94 +46,69 @@ int main() {
     return -1;
   }
 
-  // glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+  std::string shader_folder_path = "assets/shaders/";
+  Shader shader                  = Shader(shader_folder_path + "default.vert", shader_folder_path + "default.frag");
 
-  unsigned int vertexShader;
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
+  std::vector<Vertex> vertices1 = {
+      {{1.0f / 2, -0.707f / 2, 0}, {0.0f, 0.0f}},
+      {{-1.0f / 2, -0.707f / 2, 0}, {0.0f, 1.0f}},
+      {{0, 0.707f / 2, 1.0f / 2}, {1.0f, 0.0f}},
+      {{0, 0.707f / 2, -1.0f / 2}, {1.0f, 1.0f}}};
 
-  unsigned int fragmentShader;
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
+  std::vector<Vertex> vertices2 = {
+      {{1.0f / 2, 0.707f / 2, 0}, {0.0f, 1.0f}}, //
+      {{-1.0f / 2, 0.707f / 2, 0}, {0.0f, 0.0f}},
+      {{0, -0.707f / 2, 1.0f / 2}, {1.0f, 1.0f}}, //
+      {{0, -0.707f / 2, -1.0f / 2}, {1.0f, 0.0f}}};
 
-  unsigned int shaderProgram;
-  shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
+  std::vector<Mesh::uint> indices1 = {0, 1, 2,
+                                      0, 3, 1,
+                                      0, 2, 3,
+                                      1, 3, 2};
 
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
+  std::vector<Mesh::uint> indices2 = {0, 2, 1,
+                                      0, 1, 3,
+                                      0, 3, 2,
+                                      1, 2, 3};
 
-  unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-  unsigned int projLoc = glGetUniformLocation(shaderProgram, "projection");
+  Texture tex1 = {"assets/textures/wall.jpg"};
+  Texture tex2 = {"assets/textures/grad.png"};
 
-  float vertices[] = {-0.8f, -0.8f, 0.0f,
-                     0.8f, -0.8f, 0.0f,
-                     0.0f,  0.8f, 0.0f,
-					-1.8f, -0.8f, -10.0f,
-                     1.8f, -0.8f, -10.0f,
-                     1.0f,  0.8f, -10.0f};
+  std::vector<Mesh::uint> textures1 = {tex1.id};
+  std::vector<Mesh::uint> textures2 = {tex2.id};
 
+  Mesh triangle1 = Mesh(vertices1, indices1, textures2);
+  Mesh triangle2 = Mesh(vertices2, indices2, textures2);
 
-  unsigned int VBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
+  std::vector<Mesh> meshes = {};
+  meshes.push_back(std::move(triangle1));
+  meshes.push_back(std::move(triangle2));
 
-  glBindVertexArray(VAO);
+  Model model     = Model(std::move(meshes), {.position = {0.f, 0.f, 0.f}, .orientation = {0.f, 0.f, 0.f, 1.0f}, .scaling = {1.f, 1.f, 1.f}});
+  model.aVelocity = {0.01f, 0.01f, 0.01f};
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
-  glEnableVertexAttribArray(0);
-
-  // non necessary
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
 
   Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
   do {
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.moveForward(0.016f);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.moveBackward(0.016f);
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    	camera.moveLeft(0.016f);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.moveRight(0.016f);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camera.moveUp(0.016f);
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-        camera.moveDown(0.016f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        camera.rotateYaw(-1.0f);
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        camera.rotateYaw(1.0f);
-
-    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glUseProgram(shaderProgram);
-    glBindVertexArray(VAO);
-    
-    glm::mat4 view = camera.getViewMatrix();
-    glm::mat4 projection = camera.getProjectionMatrix(ASPECT);
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    // glDrawElements(GL_TRIANGLES, ));
+    model.update(1);
+    shader.use();
+    model.draw(shader);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
   } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            !glfwWindowShouldClose(window));
 
+  spdlog::info("Terminating");
   glfwTerminate();
   return 0;
 }
