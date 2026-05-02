@@ -94,6 +94,8 @@ int main() {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
+  Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
   do {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
