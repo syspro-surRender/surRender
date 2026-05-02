@@ -2,6 +2,7 @@
 #include "model.h"
 #include "shader.h"
 #include "texture.h"
+#include "camera.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -11,6 +12,10 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <vector>
+
+#define WINDOW_WIDTH  1000
+#define WINDOW_HEIGHT 800
+#define ASPECT (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT
 
 int main() {
   std::vector<spdlog::sink_ptr> sinks;
@@ -30,7 +35,7 @@ int main() {
   glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
   GLFWwindow* window;
-  window = glfwCreateWindow(800, 800, "Test", nullptr, nullptr);
+  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Test", nullptr, nullptr);
   if (window == nullptr) {
     glfwTerminate();
     spdlog::error("Window creation failed\n");
@@ -38,7 +43,7 @@ int main() {
   }
   glfwMakeContextCurrent(window);
 
-  glViewport(0, 0, 800, 800);
+  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   glewExperimental = GL_TRUE;
   if (glewInit() != GLEW_OK) {
@@ -93,11 +98,36 @@ int main() {
 
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
+  glFrontFace(GL_CW);
 
   Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
   do {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.moveForward(0.016f);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.moveBackward(0.016f);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    	camera.moveLeft(0.016f);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.moveRight(0.016f);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        camera.moveUp(0.016f);
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        camera.moveDown(0.016f);
+
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        camera.rotateYaw(-1.0f);
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        camera.rotateYaw(1.0f);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 projection = camera.getProjectionMatrix(ASPECT);
+    glm::mat4 mvp = projection * view * model.modelMatrix;
+
+    shader.setMat4("mvp", mvp);
 
     model.update(1);
     shader.use();

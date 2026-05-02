@@ -2,6 +2,7 @@
 #define SHADER_H_
 
 #include <string>
+#include <glm/glm.hpp>
 
 struct Shader {
   using uint = unsigned int;
@@ -17,6 +18,7 @@ struct Shader {
   ~Shader();
 
   void use() const;
+  void setMat4(const std::string& name, const glm::mat4& matrix) const;
 
   uint program;
 };
