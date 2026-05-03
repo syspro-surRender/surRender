@@ -40,7 +40,7 @@ int main() {
     return -1;
   }
 
-  Model spinningBananaCat("assets/model/bananacat/bananacat.glb");
+  Model spinningBananaCat("assets/model/bananacat/source/Banana.glb");
 
   std::string shader_folder_path = "assets/shaders/";
   Shader shader                  = Shader(shader_folder_path + "default.vert", shader_folder_path + "default.frag");
