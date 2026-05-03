@@ -4,6 +4,9 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/ext/quaternion_geometric.hpp>
+#include <glm/ext/scalar_constants.hpp>
+#include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
@@ -51,12 +54,17 @@ int main() {
     return -1;
   }
 
-  Model model("assets/model/banana/source/Banana.glb", {.position = {0.f, 0.f, 0.f}, .orientation = {0.f, 0.f, 0.f, 1.0f}, .scaling = {1.f, 1.f, 1.f}});
+  Model model("assets/model/banana/source/Banana.glb",
+              {.position    = {0.f, 0.f, 0.f},
+               .orientation = glm::rotate(glm::quat({0.f, 0.f, 0.f, -1.f}), -7.0f * glm::pi<float>() / 8, {0, 0, 1}),
+               //  .orientation = {0.f, 0.f, 0.f, 1.f},
+               .scaling     = {.5f, .5f, .5f}});
 
   std::string shader_folder_path = "assets/shaders/";
   Shader shader                  = Shader(shader_folder_path + "default.vert", shader_folder_path + "default.frag");
 
-  model.aVelocity = {0.01f, 0.01f, 0.01f};
+
+  model.aVelocity = {0.0f, 0.05f, 0.0f};
 
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

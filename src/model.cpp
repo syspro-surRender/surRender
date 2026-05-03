@@ -205,5 +205,6 @@ void Model::update(const unsigned int deltaT) {
 void Model::calculateMatrix() {
   modelMatrix = glm::mat4(1.0f);
   modelMatrix = glm::translate(modelMatrix, transform.position);
-  modelMatrix = modelMatrix * glm::toMat4(transform.orientation);
+  modelMatrix = glm::scale(modelMatrix, transform.scaling);
+  modelMatrix = modelMatrix * glm::toMat4(glm::normalize(transform.orientation));
 }
