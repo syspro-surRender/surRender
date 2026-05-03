@@ -1,9 +1,15 @@
 #include "model.h"
 
+#include "texture.h"
+
+#include <GL/glew.h>
 #include <assimp/Importer.hpp>
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <iostream>
+#include <map>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -16,7 +22,7 @@ Model::Model(const std::string& path) {
 
 void Model::Draw(Shader& shader) const {
   for (const auto& mesh : meshes) {
-    mesh.draw(shader);
+    mesh->draw(shader);
   }
 }
 
@@ -40,6 +46,68 @@ void Model::loadModel(const std::string& path) {
   processNode(scene->mRootNode, scene);
 }
 
+uint TextureFromFile(const char* path, const std::string& directory) {
+  std::string filename = std::string(path);
+  filename             = directory + "/" + filename;
+
+  uint textureID;
+  glGenTextures(1, &textureID);
+
+  int width, height, nrComponents;
+  unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+  if (data) {
+    GLenum format;
+    if (nrComponents == 1) {
+      format = GL_RED;
+    } else if (nrComponents == 3) {
+      format = GL_RGB;
+    } else if (nrComponents == 4) {
+      format = GL_RGBA;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_image_free(data);
+  } else {
+    std::cout << "Texture failed to load at path: " << path << std::endl;
+    stbi_image_free(data);
+  }
+
+  return textureID;
+}
+
+std::vector<uint> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName) {
+  std::vector<uint> ids;
+
+  for (size_t i = 0; i < mat->GetTextureCount(type); i++) {
+    aiString str;
+    mat->GetTexture(type, i, &str);
+
+    bool skip = false;
+    for (const auto& loaded : textureCache) {
+      if (std::strcmp(loaded.path.c_str(), str.C_Str()) == 0) {
+        ids.push_back(loaded.id);
+        skip = true;
+        break;
+      }
+    }
+
+    if (!skip) {
+      uint textureID = TextureFromFile(str.C_Str(), directory);
+      textureCache.push_back({std::string(str.C_Str()), textureID});
+      ids.push_back(textureID);
+    }
+  }
+  return ids;
+}
+
 void Model::processNode(aiNode* node, const aiScene* scene) {
   // aiNode contains mName, mTransformation, mMeshes[] -  INDEXES, mChildren[]
   for (size_t i = 0; i < node->mNumMeshes; i++) {
@@ -53,7 +121,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
   }
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
   std::vector<Vertex> vertices;
   std::vector<uint> indices;
   std::vector<uint> textures;
@@ -91,5 +159,14 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
   }
 
-  return Mesh(vertices, indices);
+  if (mesh->mMaterialIndex >= 0) {
+    aiMaterial* material    = scene->mMaterials[mesh->mMaterialIndex];
+    vector<uint> diffuseIDs = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+    textures.insert(textures.end(), diffuseIDs.begin(), diffuseIDs.end());
+
+    vector<uint> specularIDs = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+    textures.insert(textures.end(), specularIDs.begin(), specularIDs.end());
+  }
+
+  return std::make_unique<Mesh>(vertices, indices, textures);
 }

@@ -3,9 +3,11 @@
 
 #include "mesh.h"
 #include "shader.h"
+#include "stb_image.h"
 #include "texture.h"
 
 #include <assimp/scene.h>
+#include <memory>
 
 using namespace std;
 
@@ -15,14 +17,20 @@ public:
   void Draw(Shader& shader) const;
 
 private:
-  std::vector<Texture> textures_loaded;
-  std::vector<Mesh> meshes;
+  struct TextureCacheEntry {
+    std::string path;
+    uint id;
+  };
+
+  std::vector<TextureCacheEntry> textureCache;
+
+  std::vector<std::unique_ptr<Mesh>> meshes;
   std::string directory;
 
   void loadModel(const std::string& path);
   void processNode(aiNode* node, const aiScene* scene);
-  std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
-  Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+  std::vector<uint> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
+  std::unique_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
 };
 
 #endif
