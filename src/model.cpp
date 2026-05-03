@@ -1,30 +1,24 @@
 #include "model.h"
 
-#include "texture.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include "GL/glew.h"
+#include "model.h"
+#include "shader.h"
 
-#include <GL/glew.h>
 #include <assimp/Importer.hpp>
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/quaternion_transform.hpp>
+#include <glm/fwd.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <iostream>
-#include <map>
-#include <memory>
+#include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-using namespace std;
-
-Model::Model(const std::string& path) {
-  loadModel(path);
-}
-
-void Model::Draw(Shader& shader) const {
-  for (const auto& mesh : meshes) {
-    mesh->draw(shader);
-  }
-}
 
 void Model::loadModel(const std::string& path) {
   // read file, free memory after work
@@ -52,7 +46,7 @@ uint TextureFromFile(const char* path, const std::string& directory) {
     std::cout << "Skipping empty texture path." << std::endl;
     return 0;
   }
-  
+
   filename = "assets/model/banana/textures/Untitled_0.png";
 
   uint textureID;
@@ -96,17 +90,17 @@ std::vector<uint> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType typ
     mat->GetTexture(type, i, &str);
 
     bool skip = false;
-    for (const auto& loaded : textureCache) {
-      if (std::strcmp(loaded.path.c_str(), str.C_Str()) == 0) {
-        ids.push_back(loaded.id);
-        skip = true;
-        break;
-      }
-    }
+    // for (const auto& loaded : textureCache) {
+    //   if (std::strcmp(loaded.path.c_str(), str.C_Str()) == 0) {
+    //     ids.push_back(loaded.id);
+    //     skip = true;
+    //     break;
+    //   }
+    // }
 
     if (!skip) {
       uint textureID = TextureFromFile(str.C_Str(), directory);
-      textureCache.push_back({std::string(str.C_Str()), textureID});
+      // textureCache.push_back({std::string(str.C_Str()), textureID});
       ids.push_back(textureID);
     }
   }
@@ -126,7 +120,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
   }
 }
 
-std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
   std::vector<Vertex> vertices;
   std::vector<uint> indices;
   std::vector<uint> textures;
@@ -165,13 +159,51 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
   }
 
   if (mesh->mMaterialIndex >= 0) {
-    aiMaterial* material    = scene->mMaterials[mesh->mMaterialIndex];
-    vector<uint> diffuseIDs = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+    aiMaterial* material         = scene->mMaterials[mesh->mMaterialIndex];
+    std::vector<uint> diffuseIDs = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     textures.insert(textures.end(), diffuseIDs.begin(), diffuseIDs.end());
 
-    vector<uint> specularIDs = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+    std::vector<uint> specularIDs = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularIDs.begin(), specularIDs.end());
   }
 
-  return std::make_unique<Mesh>(vertices, indices, textures);
+  return Mesh(vertices, indices, textures);
+}
+
+Model::Model(const std::string& path, const TransformParameters& params):
+    speed(1.0f), aSpeed(1.0f), aVelocity(0.0f), velocity(0.0f) {
+  loadModel(path);
+  transform = params;
+  calculateMatrix();
+}
+
+Model::Model(std::vector<Mesh>&& meshes, const TransformParameters& params):
+    meshes(std::move(meshes)), speed(1.0f), aSpeed(1.0f), aVelocity(0.0f), velocity(0.0f) {
+  transform = params;
+  calculateMatrix();
+}
+
+Model::~Model() {
+  spdlog::info("Destructor of model was called");
+}
+
+void Model::draw(const Shader& shader) const {
+  unsigned int loc = glGetUniformLocation(shader.program, "transform");
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+  // shader.use();
+  for (auto& mesh : meshes)
+    mesh.draw(shader);
+}
+
+void Model::update(const unsigned int deltaT) {
+  transform.position += velocity * (speed * deltaT);
+  transform.orientation = glm::quat((aSpeed * deltaT) * aVelocity) * transform.orientation;
+  calculateMatrix();
+}
+
+void Model::calculateMatrix() {
+  modelMatrix = glm::mat4(1.0f);
+  modelMatrix = glm::translate(modelMatrix, transform.position);
+  modelMatrix = modelMatrix * glm::toMat4(transform.orientation);
 }

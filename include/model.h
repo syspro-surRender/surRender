@@ -7,30 +7,48 @@
 #include "texture.h"
 
 #include <assimp/scene.h>
-#include <memory>
+#include <glm/fwd.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <unordered_map>
+#include <vector>
 
-using namespace std;
+struct TransformParameters {
+  glm::vec3 position;
+  glm::quat orientation;
+  glm::vec3 scaling;
+};
 
-class Model {
-public:
-  Model(const std::string& path);
-  void Draw(Shader& shader) const;
+struct Model;
 
-private:
-  struct TextureCacheEntry {
-    std::string path;
-    uint id;
-  };
+struct Model {
+  static std::unordered_map<std::string, Texture::uint> textureCache;
 
-  std::vector<TextureCacheEntry> textureCache;
+  std::vector<Mesh> meshes;
+  glm::mat4 modelMatrix;
 
-  std::vector<std::unique_ptr<Mesh>> meshes;
+  // std::vector<std::unique_ptr<Mesh>> meshes;
   std::string directory;
 
   void loadModel(const std::string& path);
   void processNode(aiNode* node, const aiScene* scene);
   std::vector<uint> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
-  std::unique_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
+  Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+
+  Model(const std::string&, const TransformParameters&);
+  Model(std::vector<Mesh>&&, const TransformParameters&);
+  ~Model();
+
+  void update(const unsigned int); //todo: change to time type
+  void draw(const Shader&) const;
+
+  // private:
+  void calculateMatrix();
+  TransformParameters transform;
+
+  const float speed, aSpeed;
+
+  glm::vec3 aVelocity;
+  glm::vec3 velocity;
 };
 
 #endif
