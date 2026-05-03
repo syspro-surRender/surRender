@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.28)
 
 project(surRender)
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/assets)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ 
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets/)
+
 set(CMAKE_CXX_STANDARD 23)
 set(CXX_STANDARD_REQUIRED ON)
 

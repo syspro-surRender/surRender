@@ -48,7 +48,11 @@ void Model::loadModel(const std::string& path) {
 
 uint TextureFromFile(const char* path, const std::string& directory) {
   std::string filename = std::string(path);
-  filename             = directory + "/" + filename;
+  if (!path || path[0] == '\0') {
+    std::cout << "Skipping empty texture path." << std::endl;
+    return 0;
+  }
+  filename = directory + "/" + filename;
 
   uint textureID;
   glGenTextures(1, &textureID);
