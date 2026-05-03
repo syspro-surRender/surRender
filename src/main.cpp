@@ -54,17 +54,19 @@ int main() {
   std::string shader_folder_path = "assets/shaders/";
   Shader shader                  = Shader(shader_folder_path + "default.vert", shader_folder_path + "default.frag");
 
-  std::vector<Vertex> vertices1 = {
-      {{1.0f / 2, -0.707f / 2, 0}, {0.0f, 0.0f}},
-      {{-1.0f / 2, -0.707f / 2, 0}, {0.0f, 1.0f}},
-      {{0, 0.707f / 2, 1.0f / 2}, {1.0f, 0.0f}},
-      {{0, 0.707f / 2, -1.0f / 2}, {1.0f, 1.0f}}};
+	std::vector<Vertex> vertices1 = {
+    {{1.0f / 2, -0.707f / 2, 0}, {0.0f, 0.0f}, {0.0f, -0.8165f, 0.5774f}},
+    {{-1.0f / 2, -0.707f / 2, 0}, {0.0f, 1.0f}, {0.0f, -0.8165f, -0.5774f}},
+    {{0, 0.707f / 2, 1.0f / 2}, {1.0f, 0.0f}, {0.8165f, 0.4082f, 0.4082f}},
+    {{0, 0.707f / 2, -1.0f / 2}, {1.0f, 1.0f}, {-0.8165f, 0.4082f, 0.4082f}}
+	};
 
-  std::vector<Vertex> vertices2 = {
-      {{1.0f / 2, 0.707f / 2, 0}, {0.0f, 1.0f}}, //
-      {{-1.0f / 2, 0.707f / 2, 0}, {0.0f, 0.0f}},
-      {{0, -0.707f / 2, 1.0f / 2}, {1.0f, 1.0f}}, //
-      {{0, -0.707f / 2, -1.0f / 2}, {1.0f, 0.0f}}};
+	std::vector<Vertex> vertices2 = {
+    {{1.0f / 2, 0.707f / 2, 0}, {0.0f, 1.0f}, {0.0f, 0.8165f, 0.5774f}},
+    {{-1.0f / 2, 0.707f / 2, 0}, {0.0f, 0.0f}, {0.0f, 0.8165f, -0.5774f}},
+    {{0, -0.707f / 2, 1.0f / 2}, {1.0f, 1.0f}, {0.8165f, -0.4082f, 0.4082f}},
+    {{0, -0.707f / 2, -1.0f / 2}, {1.0f, 0.0f}, {-0.8165f, -0.4082f, 0.4082f}}
+	};
 
   std::vector<Mesh::uint> indices1 = {0, 1, 2,
                                       0, 3, 1,
@@ -82,8 +84,10 @@ int main() {
   std::vector<Mesh::uint> textures1 = {tex1.id};
   std::vector<Mesh::uint> textures2 = {tex2.id};
 
-  Mesh triangle1 = Mesh(vertices1, indices1, textures2);
-  Mesh triangle2 = Mesh(vertices2, indices2, textures2);
+  Mesh triangle1 = Mesh(vertices1, indices1, textures1);
+  Mesh triangle2 = Mesh(vertices2, indices2, textures1);
+
+  Mesh triangle3 = Mesh(vertices1, indices1, textures2);
 
   std::vector<Mesh> meshes = {};
   meshes.push_back(std::move(triangle1));
@@ -91,6 +95,12 @@ int main() {
 
   Model model     = Model(std::move(meshes), {.position = {0.f, 0.f, 0.f}, .orientation = {0.f, 0.f, 0.f, 1.0f}, .scaling = {1.f, 1.f, 1.f}});
   model.aVelocity = {0.01f, 0.01f, 0.01f};
+
+  meshes.push_back(std::move(triangle3));
+
+  Model model2     = Model(std::move(meshes), {.position = {1.0f, 0.f, 0.f}, .orientation = {0.f, 0.f, 0.f, 1.0f}, .scaling = {1.f, 1.f, 1.f}});
+  model2.aVelocity = {0.0f, 0.0f, 0.0f};
+
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_DEPTH_TEST);
@@ -107,7 +117,7 @@ int main() {
         camera.moveForward(0.016f);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         camera.moveBackward(0.016f);
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     	camera.moveLeft(0.016f);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.moveRight(0.016f);
@@ -121,17 +131,31 @@ int main() {
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
         camera.rotateYaw(1.0f);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glm::mat4 view = camera.getViewMatrix();
     glm::mat4 projection = camera.getProjectionMatrix(ASPECT);
     glm::mat4 mvp = projection * view * model.modelMatrix;
 
-    shader.setMat4("mvp", mvp);
+		glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    model.update(1);
+		model.update(1);
+		model2.update(1);
+
     shader.use();
+
+    shader.setMat4("mvp", mvp);
+		shader.setMat4("model", model.modelMatrix);
+  	shader.setVec3("ourLightPos", glm::vec3(0.0f, 2.0f, 2.0f));
+
     model.draw(shader);
+
+    mvp = projection * view * model2.modelMatrix;
+
+    shader.setMat4("mvp", mvp);
+		shader.setMat4("model", model2.modelMatrix);
+  	shader.setVec3("ourLightPos", glm::vec3(0.0f, 2.0f, 2.0f));
+
+		model2.draw(shader);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

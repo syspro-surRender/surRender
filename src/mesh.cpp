@@ -35,6 +35,10 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint>& indices
   glVertexAttribPointer(1, decltype(Vertex::texCoord)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, texCoord));
   glEnableVertexAttribArray(1);
 
+  // setting vertex normal pointer
+  glVertexAttribPointer(2, decltype(Vertex::normal)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, normal));
+  glEnableVertexAttribArray(2);
+
   // unbinding
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
