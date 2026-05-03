@@ -80,7 +80,7 @@ uint TextureFromFile(const char* path, const std::string& directory) {
 
     stbi_image_free(data);
   } else {
-    std::cout << "Texture failed to load at path: " << path << std::endl;
+    std::cout << "In model: Texture failed to load at path: " << path << std::endl;
     stbi_image_free(data);
   }
 

@@ -1,3 +1,4 @@
+#include "engine.h"
 #include "mesh.h"
 #include "model.h"
 #include "shader.h"
@@ -10,42 +11,59 @@
 #include <iostream>
 #include <vector>
 
+using namespace std;
+
 int main() {
-  if (!glfwInit()) {
-    std::cerr << "GLFW init failed\n";
+  try {
+    Engine engine(800, 800, "SpinningBananaCatUiUiUiUi", "assets/model/bananacat/bananacat.glb", "assets/shaders/");
+    std::cout << "Engine constructed" << endl;
+    engine.run();
+  } catch (const std::exception& e) {
+    std::cerr << "Critical section: " << e.what() << endl;
     return -1;
   }
-
-  glfwWindowHint(GLFW_SAMPLES, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+  return 0;
 
 
-  GLFWwindow* window;
-  window = glfwCreateWindow(800, 800, "Test", nullptr, nullptr);
-  if (window == nullptr) {
-    glfwTerminate();
-    std::cerr << "window creation failed\n";
-    return -1;
-  }
-  glfwMakeContextCurrent(window);
+  // display_manager.cpp
 
-  glViewport(0, 0, 800, 800);
+  // if (!glfwInit()) {
+  //   std::cerr << "GLFW init failed\n";
+  //   return -1;
+  // }
 
-  glewExperimental = GL_TRUE;
-  if (glewInit() != GLEW_OK) {
-    std::cerr << "glew init failed\n";
-    return -1;
-  }
+  // glfwWindowHint(GLFW_SAMPLES, 4);
+  // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  // glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
-  Model spinningBananaCat("assets/model/bananacat/bananacat.glb");
 
-  std::string shader_folder_path = "assets/shaders/";
-  Shader shader                  = Shader(shader_folder_path + "default.vert", shader_folder_path + "default.frag");
+  // GLFWwindow* window;
+  // window = glfwCreateWindow(800, 800, "Test", nullptr, nullptr);
+  // if (window == nullptr) {
+  //   glfwTerminate();
+  //   std::cerr << "window creation failed\n";
+  //   return -1;
+  // }
+  // glfwMakeContextCurrent(window);
 
-  glEnable(GL_DEPTH_TEST);
+  // engine.cpp
+
+  // glViewport(0, 0, 800, 800);
+
+  // glewExperimental = GL_TRUE;
+  // if (glewInit() != GLEW_OK) {
+  //   std::cerr << "glew init failed\n";
+  //   return -1;
+  // }
+
+  // Model spinningBananaCat("assets/model/bananacat/bananacat.glb");
+
+  // std::string shader_folder_path = "assets/shaders/";
+  // Shader shader                  = Shader(shader_folder_path + "default.vert", shader_folder_path + "default.frag");
+
+  // glEnable(GL_DEPTH_TEST);
 
   // std::vector<Vertex> vertices = {
   //     {{0.0f, 0.5f, 0.0f}, {0.0f, 0.5f}},
@@ -65,19 +83,19 @@ int main() {
 
   // Mesh triangle = Mesh(vertices, indices, textures);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-  do {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // do {
+  //   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // triangle.draw(shader);
-    spinningBananaCat.Draw(shader);
+  //   // triangle.draw(shader);
+  //   spinningBananaCat.Draw(shader);
 
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-  } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-           !glfwWindowShouldClose(window));
+  //   glfwSwapBuffers(window);
+  //   glfwPollEvents();
+  // } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+  //          !glfwWindowShouldClose(window));
 
-  glfwTerminate();
-  return 0;
+  // glfwTerminate();
+  // return 0;
 }

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(surRender)
 
+
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/assets)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ 
@@ -27,7 +28,7 @@ include_directories(include/ libs/)
 
 
 add_executable(surRender
-  src/main.cpp src/mesh.cpp src/shader.cpp src/texture.cpp src/model.cpp
+  src/main.cpp src/mesh.cpp src/shader.cpp src/texture.cpp src/model.cpp src/engine.cpp src/display_manager.cpp src/render_manager.cpp 
 )
 
 target_link_libraries(surRender OpenGL::OpenGL glfw GLEW ${ASSIMP_LIBRARIES})
