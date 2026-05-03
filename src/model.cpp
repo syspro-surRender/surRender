@@ -4,14 +4,17 @@
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <stdexcept>
 #include <string>
 #include <vector>
+
+using namespace std;
 
 Model::Model(const std::string& path) {
   loadModel(path);
 }
 
-void Model::Draw(Shader& shader) {
+void Model::Draw(Shader& shader) const {
   for (const auto& mesh : meshes) {
     mesh.draw(shader);
   }
@@ -23,13 +26,13 @@ void Model::loadModel(const std::string& path) {
 
   // aiScene contains mRootNode, mMeshes[], mMaterials[], mAnimations[]
   // ReadFile takes path and flags
-  const aiScene scene = importer.ReadFile(path,
-                                          aiProcess_Triangulate |    // divide all polygons in triangle
-                                              aiProcess_FlipUVs |    // standart coord for opengl
-                                              aiProcess_GenNormals); // if there is no normals in file, generate them
+  const aiScene* scene = importer.ReadFile(path,
+                                           aiProcess_Triangulate |    // divide all polygons in triangle
+                                               aiProcess_FlipUVs |    // standart coord for opengl
+                                               aiProcess_GenNormals); // if there is no normals in file, generate them
 
   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-    throw std::runtime_error("Assimp error: " + std::string(importer.GetErrorString));
+    throw std::runtime_error("Assimp error: " + std::string(importer.GetErrorString()));
   }
 
   directory = path.substr(0, path.find_last_of('/'));
@@ -37,7 +40,7 @@ void Model::loadModel(const std::string& path) {
   processNode(scene->mRootNode, scene);
 }
 
-void Model::processModel(aiNode* node, const aiScene* scene) {
+void Model::processNode(aiNode* node, const aiScene* scene) {
   // aiNode contains mName, mTransformation, mMeshes[] -  INDEXES, mChildren[]
   for (size_t i = 0; i < node->mNumMeshes; i++) {
     aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
@@ -45,8 +48,8 @@ void Model::processModel(aiNode* node, const aiScene* scene) {
     meshes.push_back(processMesh(mesh, scene));
   }
 
-  for (size_t i = 0; i < node->numChildren; i++) {
-    processNode(node->mChildren[i]);
+  for (size_t i = 0; i < node->mNumChildren; i++) {
+    processNode(node->mChildren[i], scene);
   }
 }
 
@@ -55,7 +58,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
   std::vector<uint> indices;
   std::vector<uint> textures;
 
-  for (size_t i = 0; i < mesh->numVertices; i++) {
+  for (size_t i = 0; i < mesh->mNumVertices; i++) {
     Vertex vertex;
     glm::vec3 vector;
     vector.x        = mesh->mVertices[i].x;
@@ -64,10 +67,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     vertex.position = vector;
 
     if (mesh->HasNormals()) {
-      vector.x      = mesh->mNormals[i].x;
-      vector.y      = mesh->mNormals[i].y;
-      vector.z      = mesh->mNormals[i].z;
-      vertex.normal = vector;
+      vector.x = mesh->mNormals[i].x;
+      vector.y = mesh->mNormals[i].y;
+      vector.z = mesh->mNormals[i].z;
+      //vertex.normal = vector;
     }
 
     if (mesh->mTextureCoords[0]) {

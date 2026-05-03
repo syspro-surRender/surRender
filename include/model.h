@@ -3,6 +3,7 @@
 
 #include "mesh.h"
 #include "shader.h"
+#include "texture.h"
 
 #include <assimp/scene.h>
 
@@ -14,11 +15,13 @@ public:
   void Draw(Shader& shader) const;
 
 private:
+  std::vector<Texture> textures_loaded;
   std::vector<Mesh> meshes;
   std::string directory;
 
   void loadModel(const std::string& path);
   void processNode(aiNode* node, const aiScene* scene);
+  std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
   Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 };
 
