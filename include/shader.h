@@ -1,8 +1,9 @@
-#ifndef SHADER_H_
-#define SHADER_H_
+#ifndef SHADER_H
+#define SHADER_H
 
 #include <string>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 struct Shader {
   using uint = unsigned int;
@@ -10,9 +11,7 @@ struct Shader {
   Shader(uint);
   Shader(const std::string vPath, const std::string fPath);
 
-  // we don't really want to delete shader if it's just a copy, so we forbid copies altogether
-  // shader objects are effectively anyway, so we pass them by reference
-  Shader(const Shader&)            = delete;
+  Shader(const Shader&) = delete;
   Shader& operator=(const Shader&) = delete;
 
   ~Shader();

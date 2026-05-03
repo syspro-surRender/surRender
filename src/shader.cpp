@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <spdlog/spdlog.h>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -40,6 +41,8 @@ Shader::Shader(const std::string vPath, const std::string fPath) {
   const char* fCode = fCodeString.c_str();
 
   int status;
+  int success;
+  char infoLog[512];
 
   Shader::uint vertexShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertexShader, 1, &vCode, NULL);
@@ -74,6 +77,12 @@ Shader::Shader(const std::string vPath, const std::string fPath) {
   glAttachShader(program, fragmentShader);
 
   glLinkProgram(program);
+
+  glGetProgramiv(program, GL_LINK_STATUS, &success);
+  if (!success) {
+    glGetProgramInfoLog(program, 512, NULL, infoLog);
+    std::cerr << "Shader program linking failed:\n" << infoLog << std::endl;
+  }
 
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
