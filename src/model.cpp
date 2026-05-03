@@ -47,12 +47,13 @@ void Model::loadModel(const std::string& path) {
 }
 
 uint TextureFromFile(const char* path, const std::string& directory) {
-  std::string filename = std::string(path);
+  std::string filename = "Untitled_0.png";
   if (!path || path[0] == '\0') {
     std::cout << "Skipping empty texture path." << std::endl;
     return 0;
   }
-  filename = directory + "/" + filename;
+  
+  filename = "assets/model/banana/textures/Untitled_0.png";
 
   uint textureID;
   glGenTextures(1, &textureID);
