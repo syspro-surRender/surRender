@@ -9,10 +9,7 @@ uniform vec3      ourLightPos;
 out vec4 FragColor;
 
 void main() {
-  vec3 fdx = dFdx(FragPos);
-  vec3 fdy = dFdy(FragPos);
-  
-  vec3 normal = normalize(cross(fdx, fdy));
+  vec3 normal = normalize(Normal);
   vec3 lightDir = normalize(ourLightPos - FragPos);
 
   float brightness = max(dot(lightDir, normal), 0.0) + 0.15;
