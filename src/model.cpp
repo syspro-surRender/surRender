@@ -75,7 +75,7 @@ uint TextureFromFile(const char* path, const std::string& directory) {
 
     stbi_image_free(data);
   } else {
-    std::cout << "Texture failed to load at path: " << path << std::endl;
+    std::cout << "In model: Texture failed to load at path: " << path << std::endl;
     stbi_image_free(data);
   }
 
@@ -134,9 +134,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     vertex.position = vector;
 
     if (mesh->HasNormals()) {
-      vector.x = mesh->mNormals[i].x;
-      vector.y = mesh->mNormals[i].y;
-      vector.z = mesh->mNormals[i].z;
+      vector.x      = mesh->mNormals[i].x;
+      vector.y      = mesh->mNormals[i].y;
+      vector.z      = mesh->mNormals[i].z;
       vertex.normal = vector;
     }
 
@@ -172,6 +172,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 Model::Model(const std::string& path, const TransformParameters& params):
     speed(1.0f), aSpeed(1.0f), aVelocity(0.0f), velocity(0.0f) {
+  spdlog::debug("Model constructor called from {0}", path);
   loadModel(path);
   transform = params;
   calculateMatrix();
@@ -183,8 +184,26 @@ Model::Model(std::vector<Mesh>&& meshes, const TransformParameters& params):
   calculateMatrix();
 }
 
+Model::Model(Model&& other):
+    // meshes(std::move(other.meshes)),
+    // modelMatrix(std::move(other.modelMatrix)),
+    // directory(std::move(other.directory)),
+    // transform(std::move(other.transform)),
+    speed(other.speed), aSpeed(other.aSpeed)
+// aVelocity(std::move(other.aVelocity)), velocity(std::move(other.velocity))
+{
+  spdlog::debug("Model move constructor called");
+  std::swap(meshes, other.meshes);
+  std::swap(modelMatrix, other.modelMatrix);
+  std::swap(directory, other.directory);
+  std::swap(transform, other.transform);
+
+  std::swap(aVelocity, other.aVelocity);
+  std::swap(velocity, other.velocity);
+}
+
 Model::~Model() {
-  spdlog::info("Destructor of model was called");
+  spdlog::debug("Destructor of model was called");
 }
 
 void Model::draw(const Shader& shader) const {

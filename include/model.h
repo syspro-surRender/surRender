@@ -36,6 +36,8 @@ struct Model {
 
   Model(const std::string&, const TransformParameters&);
   Model(std::vector<Mesh>&&, const TransformParameters&);
+
+  Model(Model&&);
   ~Model();
 
   void update(const unsigned int); //todo: change to time type

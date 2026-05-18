@@ -3,7 +3,6 @@
 #include "GL/glew.h"
 #include "shader.h"
 
-#include <GL/gl.h>
 #include <cstddef>
 #include <spdlog/spdlog.h>
 #include <utility>
@@ -57,7 +56,7 @@ Mesh::Mesh(Mesh&& other) {
 }
 
 Mesh::~Mesh() {
-  spdlog::info("Destructor of mesh with VAO {}, VBO {}, EBO {} was called", VAO, VBO, EBO);
+  spdlog::debug("Destructor of mesh with VAO {}, VBO {}, EBO {} was called", VAO, VBO, EBO);
   if (VBO) {
     Mesh::uint buf[2] = {VBO, EBO};
     glDeleteBuffers(2, buf);

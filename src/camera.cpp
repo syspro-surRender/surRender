@@ -4,7 +4,7 @@ glm::mat4 Camera::getViewMatrix() {
   return glm::lookAt(position, position + front, up);
 }
 
-glm::mat4 Camera::getProjectionMatrix(float aspectRatio) {
+glm::mat4 Camera::getProjectionMatrix() {
   return glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
 }
 
