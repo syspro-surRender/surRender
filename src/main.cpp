@@ -14,10 +14,6 @@
 #include <spdlog/spdlog.h>
 #include <vector>
 
-#define WINDOW_WIDTH 1000
-#define WINDOW_HEIGHT 800
-#define ASPECT (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT
-
 int main() {
   std::vector<spdlog::sink_ptr> sinks;
   sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_st>());

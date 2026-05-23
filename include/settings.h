@@ -1,0 +1,3 @@
+#define WINDOW_WIDTH 400
+#define WINDOW_HEIGHT 800
+#define ASPECT (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT

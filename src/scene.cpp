@@ -3,11 +3,12 @@
 #include "camera.h"
 #include "model.h"
 #include "shader.h"
+#include "settings.h"
 
 #include <glm/glm.hpp>
 
 Scene::Scene():
-    camera(glm::vec3(0.0f, 0.0f, 3.0f), 16. / 9),
+    camera(glm::vec3(0.0f, 0.0f, 3.0f), ASPECT),
     shader("assets/shaders/default.vert", "assets/shaders/default.frag") {
   TransformParameters tp = {.position    = {0.f, 0.f, 0.f},
                             .orientation = glm::rotate(glm::quat({0.f, 0.f, 0.f, -1.f}), -7.0f * glm::pi<float>() / 8, {0, 0, 1}),

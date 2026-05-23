@@ -18,7 +18,7 @@ DisplayManager::DisplayManager() {
   glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
 
-  window = glfwCreateWindow(800, 600, "Test", nullptr, nullptr);
+  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Test", nullptr, nullptr);
   if (window == nullptr) {
     glfwTerminate();
     spdlog::error("Window creation failed");
@@ -26,7 +26,7 @@ DisplayManager::DisplayManager() {
   }
   glfwMakeContextCurrent(window);
 
-  glViewport(0, 0, 800, 600);
+  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   glewExperimental = GL_TRUE;
   if (glewInit() != GLEW_OK) {
