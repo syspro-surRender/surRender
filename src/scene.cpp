@@ -1,11 +1,17 @@
 #include "scene.h"
 
+#include "light.h"
 #include "camera.h"
 #include "model.h"
 #include "shader.h"
 #include "settings.h"
 
 #include <glm/glm.hpp>
+
+const std::vector<Light> LIGHTS = {
+  {{2.0f, 3.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, 1.0f},
+  {{-1.0f, 1.0f, 2.0f}, {0.0f, 1.0f, 0.0f}, 0.6f}
+};
 
 Scene::Scene():
     camera(glm::vec3(0.0f, 0.0f, 3.0f), ASPECT),
@@ -27,6 +33,15 @@ void Scene::draw() {
   glm::mat4 VP = camera.getProjectionMatrix() * camera.getViewMatrix();
 
   shader.use();
+
+  for (int i = 0; i < LIGHTS.size(); i++) {
+    shader.setVec3("ourLights[" + std::to_string(i) + "].pos", LIGHTS[i].pos);
+    shader.setVec3("ourLights[" + std::to_string(i) + "].color", LIGHTS[i].color);
+    shader.setFloat("ourLights[" + std::to_string(i) + "].intensity", LIGHTS[i].intensity);
+  }
+
+  shader.setInt("ourLightsN", LIGHTS.size());
+
   for (Model& model : models) {
     M = model.modelMatrix;
 
@@ -34,7 +49,6 @@ void Scene::draw() {
 
     shader.setMat4("model", M);
     shader.setMat4("mvp", MVP);
-    shader.setVec3("ourLightPos", glm::vec3(0.0f, 2.0f, 2.0f));
 
     model.draw(shader);
   }
