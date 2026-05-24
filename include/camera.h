@@ -1,23 +1,27 @@
-#ifndef CAMERA_H_
-#define CAMERA_H_
+#ifndef CAMERACLASS
+#define CAMERACLASS
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 class Camera {
 private:
   glm::vec3 position;
-  glm::vec3 front;
-  glm::vec3 right;
-  glm::vec3 up;
+  glm::quat orientation;
 
   float rotationSpeed;
   float movementSpeed;
   float aspectRatio;
 
 public:
-  Camera(glm::vec3 startPos, float aspectRatio):
-      position(startPos), front(0.0f, 0.0f, -1.0f), right(1.0f, 0.0f, 0.0f), up(0.0f, 1.0f, 0.0f), movementSpeed(3.0f), aspectRatio(aspectRatio){};
+  Camera(glm::vec3 startPos, float aspectRatio): 
+    position(startPos),
+    orientation(1.0f, 0.0f, 0.0f, 0.0f),
+    movementSpeed(3.0f),
+    rotationSpeed(90.0f),
+    aspectRatio(aspectRatio)
+  {};
 
   glm::mat4 getViewMatrix();
   glm::mat4 getProjectionMatrix();
@@ -25,10 +29,8 @@ public:
   void setPosition(const glm::vec3& pos);
   glm::vec3 getPosition();
 
-  void setDirection(const glm::vec3& dir);
-  glm::vec3 getDirection();
-
   void rotateYaw(float degrees);
+  void rotatePitch(float degrees);
 
   void move(glm::vec3& vec);
 

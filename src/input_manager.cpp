@@ -33,6 +33,11 @@ void InputManager::processInput(bool& done) {
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     camera.rotateYaw(1.0f);
 
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    camera.rotatePitch(1.0f);
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    camera.rotatePitch(-1.0f);
+
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
