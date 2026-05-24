@@ -1,6 +1,6 @@
 #version 460 core
 
-#define AMBIENT    0.15
+#define AMBIENT    0.03
 #define MAX_LIGHTS 10
 
 struct Light {
@@ -25,7 +25,7 @@ void main() {
 
   for (int i = 0; i < ourLightsN; i++) {
     vec3 lightDir = normalize(ourLights[i].pos - FragPos);
-    result += max(dot(normal, lightDir), 0.0) * ourLights[i].color * ourLights[i].intensity;
+    result += max(dot(normal, lightDir), 0.0) * ourLights[i].color * (ourLights[i].intensity / length(ourLights[i].pos - FragPos));
   }
   
   vec4 texColor = texture(ourTexture, TexCoord);
