@@ -17,6 +17,7 @@ struct RenderManager {
 private:
   DisplayManager& displayManager;
   SceneManager& sceneManager;
+  Shader skyboxShader;
 };
 
 #endif

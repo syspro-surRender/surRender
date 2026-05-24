@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "model.h"
+#include "skybox.h"
 
 #include <vector>
 
@@ -12,11 +13,12 @@ struct Scene {
   Scene();
   ~Scene();
 
-  void draw();
+  void draw(const Shader& skyboxShader);
 
-private:
   friend struct SceneManager;
   friend struct InputManager;
+  Skybox skybox;
+  Shader skyboxShader;
   Camera camera;
   Shader shader;
 

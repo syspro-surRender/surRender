@@ -6,7 +6,8 @@
 #include <spdlog/spdlog.h>
 
 RenderManager::RenderManager(DisplayManager& displayManager, SceneManager& sceneManager):
-    displayManager(displayManager), sceneManager(sceneManager) {
+    displayManager(displayManager), sceneManager(sceneManager),
+    skyboxShader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag") {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
@@ -24,5 +25,14 @@ void RenderManager::draw() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  sceneManager.scene.draw();
+  {
+    skyboxShader.use();
+
+    skyboxShader.setMat4("projection", sceneManager.scene.camera.getProjectionMatrix());
+    skyboxShader.setMat4("view", glm::mat4(glm::mat3(sceneManager.scene.camera.getViewMatrix())));
+
+    sceneManager.scene.skybox.Draw(skyboxShader);
+  }
+
+  sceneManager.scene.draw(skyboxShader);
 }
