@@ -33,5 +33,5 @@ Texture::Texture(std::string path) {
 
 Texture::~Texture() {
   spdlog::info("Destructor of texture with id {} was called", id);
-  glDeleteTextures(1, &id);
+  // glDeleteTextures(1, &id);
 }

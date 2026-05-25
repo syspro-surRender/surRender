@@ -1,5 +1,7 @@
 #include "model.h"
 
+#include "texture.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include "GL/glew.h"
 #include "model.h"
@@ -82,12 +84,13 @@ uint TextureFromFile(const char* path, const std::string& directory) {
   return textureID;
 }
 
-std::vector<uint> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName) {
+std::vector<uint> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const aiScene* scene) {
   std::vector<uint> ids;
 
   for (size_t i = 0; i < mat->GetTextureCount(type); i++) {
     aiString str;
     mat->GetTexture(type, i, &str);
+    const aiTexture* text = scene->GetEmbeddedTexture(str.C_Str());
 
     bool skip = false;
     // for (const auto& loaded : textureCache) {
@@ -99,7 +102,11 @@ std::vector<uint> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType typ
     // }
 
     if (!skip) {
-      uint textureID = TextureFromFile(str.C_Str(), directory);
+      std::string path = directory + "/" + std::string(text->mFilename.C_Str()) + ".png";
+      // spdlog::debug(directory);
+      // spdlog::debug(text->mFilename.C_Str());
+      Texture tex(path);
+      uint textureID = tex.id;
       // textureCache.push_back({std::string(str.C_Str()), textureID});
       ids.push_back(textureID);
     }
@@ -160,10 +167,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
   if (mesh->mMaterialIndex >= 0) {
     aiMaterial* material         = scene->mMaterials[mesh->mMaterialIndex];
-    std::vector<uint> diffuseIDs = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+    std::vector<uint> diffuseIDs = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
     textures.insert(textures.end(), diffuseIDs.begin(), diffuseIDs.end());
 
-    std::vector<uint> specularIDs = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+    std::vector<uint> specularIDs = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", scene);
     textures.insert(textures.end(), specularIDs.begin(), specularIDs.end());
   }
 

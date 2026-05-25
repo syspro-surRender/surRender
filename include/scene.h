@@ -13,14 +13,15 @@ struct Scene {
   Scene();
   ~Scene();
 
-  void draw(const Shader& skyboxShader);
+  void draw();
 
   friend struct SceneManager;
   friend struct InputManager;
-  Skybox skybox;
-  Shader skyboxShader;
   Camera camera;
   Shader shader;
+
+  Skybox skybox;
+  Shader skyboxShader;
 
   std::vector<Model> models;
 };

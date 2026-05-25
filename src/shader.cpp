@@ -3,11 +3,10 @@
 #include "GL/glew.h"
 
 #include <fstream>
+#include <glm/gtc/type_ptr.hpp>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdexcept>
-
-#include <glm/gtc/type_ptr.hpp>
 
 Shader::Shader(Shader::uint id):
     program(id){};

@@ -31,7 +31,7 @@ struct Model {
 
   void loadModel(const std::string& path);
   void processNode(aiNode* node, const aiScene* scene);
-  std::vector<uint> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
+  std::vector<uint> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const aiScene* scene);
   Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 
   Model(const std::string&, const TransformParameters&);

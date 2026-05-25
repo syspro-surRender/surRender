@@ -15,6 +15,8 @@ RenderManager::RenderManager(DisplayManager& displayManager, SceneManager& scene
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
+
+  Skybox::cube.setup();
 }
 
 RenderManager::~RenderManager() {
@@ -25,14 +27,14 @@ void RenderManager::draw() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  {
-    skyboxShader.use();
+  // {
+  //   skyboxShader.use();
 
-    skyboxShader.setMat4("projection", sceneManager.scene.camera.getProjectionMatrix());
-    skyboxShader.setMat4("view", glm::mat4(glm::mat3(sceneManager.scene.camera.getViewMatrix())));
+  //   skyboxShader.setMat4("projection", sceneManager.scene.camera.getProjectionMatrix());
+  //   skyboxShader.setMat4("view", glm::mat4(glm::mat3(sceneManager.scene.camera.getViewMatrix())));
 
-    sceneManager.scene.skybox.Draw(skyboxShader);
-  }
+  //   sceneManager.scene.skybox.Draw(skyboxShader);
+  // }
 
-  sceneManager.scene.draw(skyboxShader);
+  sceneManager.scene.draw();
 }
