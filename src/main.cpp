@@ -1,5 +1,6 @@
 #include "engine.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <asm-generic/errno.h>
@@ -19,7 +20,7 @@ int main() {
   sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_st>());
   sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_st>("log.txt", true));
   spdlog::set_default_logger(std::make_shared<spdlog::logger>("Base", begin(sinks), end(sinks)));
-  spdlog::set_level(spdlog::level::info);
+  spdlog::set_level(spdlog::level::debug);
 
   Engine engine = Engine();
   engine.run();

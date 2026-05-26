@@ -13,6 +13,10 @@ struct Texture {
   Texture& operator=(const Texture&) = delete;
 
   ~Texture();
+
+protected:
+  Texture(uint id):
+      id(id){};
 };
 
 #endif

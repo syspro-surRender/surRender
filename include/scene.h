@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "model.h"
+#include "skybox.h"
 
 #include <vector>
 
@@ -14,11 +15,13 @@ struct Scene {
 
   void draw();
 
-private:
   friend struct SceneManager;
   friend struct InputManager;
   Camera camera;
   Shader shader;
+
+  Skybox skybox;
+  Shader skyboxShader;
 
   std::vector<Model> models;
 };
